@@ -98,6 +98,8 @@
           }
           this.removeEventListener('mouseenter', this._hideHandler);
         }
+        this._showHandler = null;
+        this._hideHandler = null;
       }
 
       _attachListeners() {
