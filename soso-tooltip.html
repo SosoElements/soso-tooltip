@@ -62,6 +62,7 @@
       disconnectCallback() {
         super.disconnectCallback();
         this._connected = false;
+        this._detachListeners();
       }
 
       get target() {
