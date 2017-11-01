@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>soso-tooltip demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../soso-tooltip.html">
+
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      .container {
+        padding: 50px 0;
+      }
+
+      button {
+        margin: 0 25px;
+      }
+
+      .custom {
+        --soso-tip-background: rgba(0, 0, 0, 0.7);
+        color: white;
+        --soso-tip-border: 2px solid red;
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body>
+  <div class="vertical-section-container centered">
+    <h3>Basic soso-tooltip demo</h3>
+    <demo-snippet>
+      <template>
+        <div class="container">
+          <button id="btn1">Below</button>
+          <button id="btn2">Above</button>
+          <button id="btn3">Left</button>
+          <button id="btn4">Right</button>
+          <soso-tooltip position="bottom" for="btn1">Tip below</soso-tooltip>
+          <soso-tooltip position="top" for="btn2">Tip above</soso-tooltip>
+          <soso-tooltip position="left" for="btn3" class="custom">
+            <h1>Tip left</h1>
+            <p>bah bah bah</p>
+          </soso-tooltip>
+          <soso-tooltip position="right" for="btn4">Tip right</soso-tooltip>
+        </div>
+      </template>
+    </demo-snippet>
+  </div>
+</body>
+
+</html>

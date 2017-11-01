@@ -1,0 +1,189 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="soso-tooltip">
+  <template>
+    <style>
+      :host {
+        position: absolute;
+        display: block;
+        outline: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        cursor: default;
+        font-family: inherit;
+        font-size: 9pt;
+        line-height: 1;
+      }
+
+      #container {
+        position: relative;
+        padding: 8px;
+        border: 1px solid #d8d8d8;
+        background: var(--soso-tip-background, white);
+        border: var(--soso-tip-border, 1px solid #d8d8d8);
+      }
+    </style>
+    <div id="container" style="display: none;">
+      <slot on-slotchange="_markDirty"></slot>
+    </div>
+  </template>
+
+  <script>
+    class SosoTooltip extends Polymer.Element {
+      static get is() { return 'soso-tooltip'; }
+      static get properties() {
+        return {
+          for: {
+            type: String,
+            observer: '_refreshTarget'
+          },
+          position: {
+            type: String,
+            value: 'bottom',
+            observer: '_markDirty'
+          },
+          offset: {
+            type: Number,
+            value: 5
+          }
+        };
+      }
+      constructor() {
+        super();
+        this._dirty = true;
+        this._showing = false;
+        this._target = null;
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        this._connected = true;
+        this._refreshTarget();
+      }
+      disconnectCallback() {
+        super.disconnectCallback();
+        this._connected = false;
+      }
+
+      get target() {
+        if (this._target) {
+          return this._target;
+        }
+        const parent = this.parentNode;
+        const owner = (this.getRootNode ? this.getRootNode() : null) || this.getOwnerDocument();
+        let t;
+        if (this.for) {
+          t = owner.querySelector('#' + this.for);
+        } else {
+          t = parent.nodeType == Node.DOCUMENT_FRAGMENT_NODE ? owner.host : parent;
+        }
+        return t;
+      }
+
+      _refreshTarget() {
+        this._detachListeners();
+        this._target = null;
+        this._target = this.target;
+        this._attachListeners();
+      }
+
+      _detachListeners() {
+        if (this._showHandler && this._hideHandler) {
+          if (this._target) {
+            this._target.removeEventListener('mouseenter', this._showHandler);
+            this._target.removeEventListener('focus', this._showHandler);
+            this._target.removeEventListener('mouseleave', this._hideHandler);
+            this._target.removeEventListener('blur', this._hideHandler);
+            this._target.removeEventListener('click', this._hideHandler);
+          }
+          this.removeEventListener('mouseenter', this._hideHandler);
+        }
+      }
+
+      _attachListeners() {
+        this._showHandler = (event) => {
+          this.show()
+        };
+        this._hideHandler = (event) => {
+          this.hide()
+        };
+        if (this._target) {
+          this._target.addEventListener('mouseenter', this._showHandler);
+          this._target.addEventListener('focus', this._showHandler);
+          this._target.addEventListener('mouseleave', this._hideHandler);
+          this._target.addEventListener('blur', this._hideHandler);
+          this._target.addEventListener('click', this._hideHandler);
+        }
+        this.addEventListener('mouseenter', this._hideHandler);
+      }
+
+      _markDirty() {
+        this._dirty = true;
+      }
+
+      show() {
+        if (this._showing) {
+          return;
+        }
+        this._showing = true;
+        this.$.container.style.display = "";
+        this.$.container.style.opacity = 0;
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            if (this._showing) {
+              this.updatePosition();
+              this.$.container.style.opacity = 1;
+            }
+          }, 50);
+        });
+      }
+
+      hide() {
+        if (!this._showing) {
+          return;
+        }
+        this._showing = false;
+        this.$.container.style.display = "none";
+      }
+
+      updatePosition() {
+        if (!this._target || !this.offsetParent) {
+          return;
+        }
+        const offset = this.offset || 0;
+        const parentRect = this.offsetParent.getBoundingClientRect();
+        const targetRect = this._target.getBoundingClientRect();
+        const tipRect = this.getBoundingClientRect();
+        const horizontalCenterOffset = (targetRect.width - tipRect.width) / 2;
+        const verticalCenterOffset = (targetRect.height - tipRect.height) / 2;
+        const targetLeft = targetRect.left - parentRect.left;
+        const targetTop = targetRect.top - parentRect.top;
+
+        let tooltipLeft, tooltipTop;
+        switch (this.position) {
+          case 'top':
+            tooltipLeft = targetLeft + horizontalCenterOffset;
+            tooltipTop = targetTop - tipRect.height - offset;
+            break;
+          case 'bottom':
+            tooltipLeft = targetLeft + horizontalCenterOffset;
+            tooltipTop = targetTop + targetRect.height + offset;
+            break;
+          case 'left':
+            tooltipLeft = targetLeft - tipRect.width - offset;
+            tooltipTop = targetTop + verticalCenterOffset;
+            break;
+          case 'right':
+            tooltipLeft = targetLeft + targetRect.width + offset;
+            tooltipTop = targetTop + verticalCenterOffset;
+            break;
+        }
+        this.style.left = tooltipLeft + 'px';
+        this.style.top = tooltipTop + 'px';
+      }
+    }
+
+    window.customElements.define(SosoTooltip.is, SosoTooltip);
+  </script>
+</dom-module>

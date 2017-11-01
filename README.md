@@ -1,2 +1,3 @@
-# soso-tooltip
+# \<soso-tooltip\>
+
 Simple tooltip
